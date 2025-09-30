@@ -4,14 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useState, useRef } from "react";
-
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    description: string;
-}
+import { Product } from "@/types/product.type";
 
 interface ProductDetailSectionProps {
     product: Product;

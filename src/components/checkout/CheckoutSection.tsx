@@ -7,19 +7,28 @@ import { useState, useRef, useMemo } from "react";
 import { useCart } from "@/context/cart/CartContext";
 import { locationData } from "@/data/checkout";
 
+type FormData = {
+    fullName: string;
+    phone: string;
+    city: string;
+    district: string;
+    delivery: string;
+    paymentMethod?: string;
+};
+
 export default function CheckoutSection() {
     const { cartItems } = useCart();
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
     const toastId = useRef(0);
 
-    // Form state
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         fullName: "",
         phone: "",
         city: "",
         district: "",
         delivery: "",
+        paymentMethod: "",
     });
 
     const availableDistricts = useMemo(() => {
@@ -31,7 +40,6 @@ export default function CheckoutSection() {
         if (!formData.city) return [];
         return locationData[formData.city as keyof typeof locationData]?.delivery || [];
     }, [formData.city]);
-
 
     const showToast = (message: string) => {
         toastId.current += 1;
@@ -51,22 +59,20 @@ export default function CheckoutSection() {
     };
 
     const handleConfirmOrder = () => {
-        const { fullName, phone, city, district, delivery } = formData;
-        if (!fullName || !phone || !city || !district || !delivery) {
+        const { fullName, phone, city, district, delivery, paymentMethod } = formData;
+        if (!fullName || !phone || !city || !district || !delivery || !paymentMethod) {
             showToast("Please fill out all fields");
             return;
         }
 
-        // Store order data in localStorage (or send to backend)
-        const orderData = { fullName, phone, city, district, delivery, cartItems };
+        const orderData = { ...formData, cartItems };
         localStorage.setItem("checkoutOrder", JSON.stringify(orderData));
 
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
             showToast("Order confirmed successfully!");
-            // Optional: redirect to confirmation page
-            // window.location.href = "/order-confirmation";
+            // Redirect or further process payment
         }, 1000);
     };
 
@@ -121,7 +127,27 @@ export default function CheckoutSection() {
                             <p className="text-base font-serif font-medium text-gray-800 mt-4">
                                 Order Total: ${total.toFixed(2)}
                             </p>
+
+                            {/* Payment Method */}
+                            <div className="mt-6">
+                                <label htmlFor="paymentMethod" className="block text-sm font-serif text-gray-600 mb-1">
+                                    Payment Method
+                                </label>
+                                <select
+                                    id="paymentMethod"
+                                    name="paymentMethod"
+                                    value={formData.paymentMethod || ""}
+                                    onChange={handleInputChange}
+                                    className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                >
+                                    <option value="">Select Payment Method</option>
+                                    <option value="khqr">Bakong KHQR</option>
+                                    <option value="card">Credit / Debit Card</option>
+                                    <option value="cod">Cash on Delivery</option>
+                                </select>
+                            </div>
                         </div>
+
                         <Link
                             href="/cart"
                             className="inline-flex items-center gap-2 text-gray-300 hover:text-gray-800 font-serif text-sm"
@@ -137,7 +163,6 @@ export default function CheckoutSection() {
                         </h3>
                         <div className="bg-white rounded-md border border-gray-200 p-6">
                             <div className="flex flex-col gap-4">
-                                {/* Full Name */}
                                 <div>
                                     <label htmlFor="fullName" className="block text-sm font-serif text-gray-600 mb-1">
                                         Full Name
@@ -153,7 +178,6 @@ export default function CheckoutSection() {
                                     />
                                 </div>
 
-                                {/* Phone Number */}
                                 <div>
                                     <label htmlFor="phone" className="block text-sm font-serif text-gray-600 mb-1">
                                         Phone Number
@@ -169,7 +193,6 @@ export default function CheckoutSection() {
                                     />
                                 </div>
 
-                                {/* City / Province */}
                                 <div>
                                     <label htmlFor="city" className="block text-sm font-serif text-gray-600 mb-1">
                                         City / Province
@@ -190,7 +213,6 @@ export default function CheckoutSection() {
                                     </select>
                                 </div>
 
-                                {/* District / ស្រុក */}
                                 <div>
                                     <label htmlFor="district" className="block text-sm font-serif text-gray-600 mb-1">
                                         District / ស្រុក
@@ -212,7 +234,6 @@ export default function CheckoutSection() {
                                     </select>
                                 </div>
 
-                                {/* Delivery Method */}
                                 <div>
                                     <label htmlFor="delivery" className="block text-sm font-serif text-gray-600 mb-1">
                                         Delivery Method
@@ -234,12 +255,10 @@ export default function CheckoutSection() {
                                     </select>
                                 </div>
 
-                                {/* Confirm Button */}
                                 <button
                                     onClick={handleConfirmOrder}
                                     disabled={loading}
                                     className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 w-full mt-4"
-                                    aria-disabled={loading}
                                 >
                                     {loading ? "Processing..." : "Confirm Order"} <ArrowRight className="w-4 h-4" />
                                 </button>

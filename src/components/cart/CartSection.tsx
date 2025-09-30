@@ -52,7 +52,7 @@ export default function CartSection() {
 
     return (
         <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 max-w-7xl mx-auto relative">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-medium text-gray-800 mb-8 sm:mb-10 text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-medium text-gray-400 mb-8 sm:mb-10 text-center">
                 Your Cart
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-8 sm:mb-12" />

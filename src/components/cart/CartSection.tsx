@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Trash2, ArrowRight } from "lucide-react";
+import { Trash2, ArrowRight, Plus, Minus } from "lucide-react";
 import { useState, useRef } from "react";
 import { useCart } from "@/context/cart/CartContext";
 
@@ -14,7 +14,6 @@ export default function CartSection() {
     const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
     const toastId = useRef(0);
 
-    // Show toast notification
     const showToast = (message: string) => {
         toastId.current += 1;
         setToast({ message, id: toastId.current });
@@ -47,7 +46,6 @@ export default function CartSection() {
         }, 1000);
     };
 
-    // Calculate total
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return (
@@ -57,9 +55,9 @@ export default function CartSection() {
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-8 sm:mb-12" />
 
-            {/* Toast Notification */}
+            {/* Toast */}
             {toast && (
-                <div className="fixed top-4 right-4 z-50 bg-gray-700 text-white px-4 py-2 rounded-md shadow-md transition-opacity duration-300 opacity-100 font-serif text-sm">
+                <div className="fixed top-4 right-4 z-50 bg-gray-700 text-white px-4 py-2 rounded-md shadow-md font-serif text-sm">
                     {toast.message}
                 </div>
             )}
@@ -73,45 +71,56 @@ export default function CartSection() {
                                 key={item.id}
                                 className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 rounded-md border border-gray-200 p-4 bg-white"
                             >
-                                <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
-                                    <Image
-                                        src={item.image}
-                                        alt={item.name}
-                                        fill
-                                        sizes="(max-width: 640px) 80px, 96px"
-                                        className="object-cover rounded"
-                                    />
+                                <div className="flex-1 flex items-center gap-4 sm:gap-6">
+                                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
+                                        <Image
+                                            src={item.image}
+                                            alt={item.name}
+                                            fill
+                                            sizes="(max-width: 640px) 80px, 96px"
+                                            className="object-cover rounded"
+                                        />
+                                    </div>
+
+                                    <div className="flex-1">
+                                        <h3 className="text-sm sm:text-base font-serif font-medium text-gray-800">
+                                            {item.name}
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-gray-600">
+                                            ${item.price.toFixed(2)} x {item.quantity}
+                                        </p>
+                                        <p className="text-xs sm:text-sm font-medium text-gray-800">
+                                            Total: ${(item.price * item.quantity).toFixed(2)}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <h3 className="text-sm sm:text-base font-serif font-medium text-gray-800">
-                                        {item.name}
-                                    </h3>
-                                    <p className="text-xs sm:text-sm text-gray-600">
-                                        ${item.price.toFixed(2)} x {item.quantity}
-                                    </p>
-                                    <p className="text-xs sm:text-sm font-medium text-gray-800">
-                                        Total: ${(item.price * item.quantity).toFixed(2)}
-                                    </p>
-                                </div>
-                                <div className="flex items-center text-black gap-2 sm:gap-4">
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        value={item.quantity}
-                                        onChange={(e) =>
-                                            handleQuantityChange(
-                                                item.id,
-                                                parseInt(e.target.value) || 0,
-                                                item.name
-                                            )
+
+                                <div className="flex items-center gap-2 sm:gap-4">
+                                    {/* Quantity controls with icons */}
+                                    <button
+                                        onClick={() =>
+                                            handleQuantityChange(item.id, item.quantity - 1, item.name)
                                         }
-                                        className="w-14 sm:w-16 p-1 sm:p-2 border border-gray-300 rounded text-center text-xs sm:text-sm"
-                                    />
+                                        className="p-1 rounded text-black border border-gray-300 hover:bg-gray-100"
+                                    >
+                                        <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    </button>
+
+                                    <span className="w-6 text-black text-center">{item.quantity}</span>
+
+                                    <button
+                                        onClick={() =>
+                                            handleQuantityChange(item.id, item.quantity + 1, item.name)
+                                        }
+                                        className="p-1 rounded text-black border border-gray-300 hover:bg-gray-100"
+                                    >
+                                        <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                                    </button>
 
                                     <button
                                         onClick={() => handleRemoveItem(item.id, item.name)}
-                                        className="text-gray-500 hover:text-gray-700 transition-colors"
-                                        aria-label={`Remove ${item.name} from cart`}
+                                        className="text-red-500 hover:text-red-700 transition-colors"
+                                        aria-label={`Remove ${item.name}`}
                                     >
                                         <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
@@ -120,7 +129,7 @@ export default function CartSection() {
                         ))}
                     </div>
 
-                    {/* Cart Summary */}
+                    {/* Summary */}
                     <div className="flex justify-end">
                         <div className="bg-white rounded-md border border-gray-200 p-4 sm:p-6 w-full sm:max-w-md">
                             <h3 className="text-lg sm:text-xl font-serif font-medium text-gray-800 mb-4">
@@ -132,8 +141,7 @@ export default function CartSection() {
                             <button
                                 onClick={handleCheckout}
                                 disabled={loading || cartItems.length === 0}
-                                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 w-full"
-                                aria-disabled={loading || cartItems.length === 0}
+                                className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed w-full"
                             >
                                 {loading ? "Processing..." : "Proceed to Checkout"}{" "}
                                 <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -148,7 +156,7 @@ export default function CartSection() {
                     </p>
                     <Link
                         href="/collections"
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
+                        className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800"
                     >
                         Shop Now <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
                     </Link>

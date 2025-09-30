@@ -3,15 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { useState, useRef } from "react";
-import { CartItem } from "@/types/cart.type";
+import { useState, useRef, useMemo } from "react";
+import { useCart } from "@/context/cart/CartContext";
+import { locationData } from "@/data/checkout";
 
-interface CheckoutSectionProps {
-    initialItems: CartItem[];
-}
-
-export default function CheckoutSection({ initialItems }: CheckoutSectionProps) {
-    const [items] = useState<CartItem[]>(initialItems);
+export default function CheckoutSection() {
+    const { cartItems } = useCart();
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
     const toastId = useRef(0);
@@ -19,13 +16,23 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
     // Form state
     const [formData, setFormData] = useState({
         fullName: "",
-        email: "",
-        address: "",
+        phone: "",
         city: "",
-        postalCode: "",
+        district: "",
+        delivery: "",
     });
 
-    // Show toast notification
+    const availableDistricts = useMemo(() => {
+        if (!formData.city) return [];
+        return locationData[formData.city as keyof typeof locationData]?.districts || [];
+    }, [formData.city]);
+
+    const availableDeliveryOptions = useMemo(() => {
+        if (!formData.city) return [];
+        return locationData[formData.city as keyof typeof locationData]?.delivery || [];
+    }, [formData.city]);
+
+
     const showToast = (message: string) => {
         toastId.current += 1;
         setToast({ message, id: toastId.current });
@@ -34,29 +41,36 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
         }, 3000);
     };
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+
+        if (name === "city") {
+            setFormData((prev) => ({ ...prev, district: "", delivery: "" }));
+        }
     };
 
     const handleConfirmOrder = () => {
-        // Basic form validation
-        if (!formData.fullName || !formData.email || !formData.address || !formData.city || !formData.postalCode) {
+        const { fullName, phone, city, district, delivery } = formData;
+        if (!fullName || !phone || !city || !district || !delivery) {
             showToast("Please fill out all fields");
             return;
         }
+
+        // Store order data in localStorage (or send to backend)
+        const orderData = { fullName, phone, city, district, delivery, cartItems };
+        localStorage.setItem("checkoutOrder", JSON.stringify(orderData));
 
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
             showToast("Order confirmed successfully!");
-            // In a real app, process payment and redirect to order confirmation
+            // Optional: redirect to confirmation page
             // window.location.href = "/order-confirmation";
         }, 1000);
     };
 
-    // Calculate total
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     return (
         <section className="py-20 px-6 max-w-7xl mx-auto relative">
@@ -65,14 +79,13 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-12" />
 
-            {/* Toast Notification */}
             {toast && (
                 <div className="fixed top-4 right-4 z-50 bg-gray-700 text-white px-4 py-2 rounded-md shadow-md transition-opacity duration-300 opacity-100 font-serif text-sm">
                     {toast.message}
                 </div>
             )}
 
-            {items.length > 0 ? (
+            {cartItems.length > 0 ? (
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Order Summary */}
                     <div className="lg:w-1/2">
@@ -80,7 +93,7 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
                             Order Summary
                         </h3>
                         <div className="bg-white rounded-md border border-gray-200 p-6 mb-6">
-                            {items.map((item) => (
+                            {cartItems.map((item) => (
                                 <div
                                     key={item.id}
                                     className="flex items-center gap-4 py-4 border-b border-gray-200 last:border-b-0"
@@ -95,9 +108,7 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="text-base font-serif font-medium text-gray-800">
-                                            {item.name}
-                                        </h4>
+                                        <h4 className="text-base font-serif font-medium text-gray-800">{item.name}</h4>
                                         <p className="text-sm text-gray-600">
                                             ${item.price.toFixed(2)} x {item.quantity}
                                         </p>
@@ -126,11 +137,9 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
                         </h3>
                         <div className="bg-white rounded-md border border-gray-200 p-6">
                             <div className="flex flex-col gap-4">
+                                {/* Full Name */}
                                 <div>
-                                    <label
-                                        htmlFor="fullName"
-                                        className="block text-sm font-serif text-gray-600 mb-1"
-                                    >
+                                    <label htmlFor="fullName" className="block text-sm font-serif text-gray-600 mb-1">
                                         Full Name
                                     </label>
                                     <input
@@ -143,76 +152,89 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
                                         placeholder="John Doe"
                                     />
                                 </div>
+
+                                {/* Phone Number */}
                                 <div>
-                                    <label
-                                        htmlFor="email"
-                                        className="block text-sm font-serif text-gray-600 mb-1"
-                                    >
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                        placeholder="john.doe@example.com"
-                                    />
-                                </div>
-                                <div>
-                                    <label
-                                        htmlFor="address"
-                                        className="block text-sm font-serif text-gray-600 mb-1"
-                                    >
-                                        Address
+                                    <label htmlFor="phone" className="block text-sm font-serif text-gray-600 mb-1">
+                                        Phone Number
                                     </label>
                                     <input
                                         type="text"
-                                        id="address"
-                                        name="address"
-                                        value={formData.address}
+                                        id="phone"
+                                        name="phone"
+                                        value={formData.phone}
                                         onChange={handleInputChange}
                                         className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                        placeholder="123 Main St"
+                                        placeholder="012 345 678"
                                     />
                                 </div>
-                                <div className="flex gap-4">
-                                    <div className="flex-1">
-                                        <label
-                                            htmlFor="city"
-                                            className="block text-sm font-serif text-gray-600 mb-1"
-                                        >
-                                            City
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="city"
-                                            name="city"
-                                            value={formData.city}
-                                            onChange={handleInputChange}
-                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                            placeholder="New York"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label
-                                            htmlFor="postalCode"
-                                            className="block text-sm font-serif text-gray-600 mb-1"
-                                        >
-                                            Postal Code
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="postalCode"
-                                            name="postalCode"
-                                            value={formData.postalCode}
-                                            onChange={handleInputChange}
-                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                            placeholder="10001"
-                                        />
-                                    </div>
+
+                                {/* City / Province */}
+                                <div>
+                                    <label htmlFor="city" className="block text-sm font-serif text-gray-600 mb-1">
+                                        City / Province
+                                    </label>
+                                    <select
+                                        id="city"
+                                        name="city"
+                                        value={formData.city}
+                                        onChange={handleInputChange}
+                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                    >
+                                        <option value="">Select City / Province</option>
+                                        {Object.keys(locationData).map((city) => (
+                                            <option key={city} value={city}>
+                                                {city}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
+
+                                {/* District / ស្រុក */}
+                                <div>
+                                    <label htmlFor="district" className="block text-sm font-serif text-gray-600 mb-1">
+                                        District / ស្រុក
+                                    </label>
+                                    <select
+                                        id="district"
+                                        name="district"
+                                        value={formData.district}
+                                        onChange={handleInputChange}
+                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                        disabled={!formData.city}
+                                    >
+                                        <option value="">Select District</option>
+                                        {availableDistricts.map((district) => (
+                                            <option key={district} value={district}>
+                                                {district}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Delivery Method */}
+                                <div>
+                                    <label htmlFor="delivery" className="block text-sm font-serif text-gray-600 mb-1">
+                                        Delivery Method
+                                    </label>
+                                    <select
+                                        id="delivery"
+                                        name="delivery"
+                                        value={formData.delivery}
+                                        onChange={handleInputChange}
+                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                        disabled={!formData.city}
+                                    >
+                                        <option value="">Select Delivery Method</option>
+                                        {availableDeliveryOptions.map((option) => (
+                                            <option key={option} value={option}>
+                                                {option}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Confirm Button */}
                                 <button
                                     onClick={handleConfirmOrder}
                                     disabled={loading}
@@ -227,9 +249,7 @@ export default function CheckoutSection({ initialItems }: CheckoutSectionProps) 
                 </div>
             ) : (
                 <div className="text-center">
-                    <p className="text-base text-gray-500 font-serif mb-6">
-                        Your cart is empty.
-                    </p>
+                    <p className="text-base text-gray-500 font-serif mb-6">Your cart is empty.</p>
                     <Link
                         href="/collections"
                         className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 transition-colors duration-200"

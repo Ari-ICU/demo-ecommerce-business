@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { User, ShoppingCart, Store, Search, Menu, X, Package, Percent, Info } from "lucide-react";
+import { useCart } from "@/context/cart/CartContext";
 
 export default function AHeader() {
-    const [cartCount] = useState(3);
+    const { cartCount } = useCart();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -81,7 +82,7 @@ export default function AHeader() {
                         </Link>
 
                         {/* Mobile menu toggle */}
-                        <button 
+                        <button
                             className="lg:hidden p-2"
                             onClick={toggleMenu}
                             aria-label="Toggle menu"

@@ -3,15 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    originalPrice: number;
-    image: string;
-    description?: string;
-}
+import { Product } from "@/types/product.type";
 
 interface SaleProductCardProps {
     product: Product;
@@ -28,9 +20,9 @@ export default function SaleProductCard({ product, onAddToCart }: SaleProductCar
             setTimeout(() => setAdding(false), 800); // Reset after animation
         }
     };
-
-    // Calculate discount percentage
-    const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    const discount = product.originalPrice
+        ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+        : 0;
 
     return (
         <div className="group flex flex-col rounded-md border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 w-full bg-white">
@@ -57,7 +49,11 @@ export default function SaleProductCard({ product, onAddToCart }: SaleProductCar
                 </h3>
                 <div className="flex items-center gap-2">
                     <p className="text-sm text-gray-600 font-medium">${product.price.toFixed(2)}</p>
-                    <p className="text-sm text-gray-400 line-through">${product.originalPrice.toFixed(2)}</p>
+                    {product.originalPrice !== undefined && (
+                        <p className="text-sm text-gray-400 line-through">
+                            ${product.originalPrice.toFixed(2)}
+                        </p>
+                    )}
                 </div>
                 {product.description && (
                     <p className="text-sm text-gray-500 line-clamp-2">

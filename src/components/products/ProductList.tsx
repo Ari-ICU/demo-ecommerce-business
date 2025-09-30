@@ -3,15 +3,7 @@
 import ProductCard from "./ProductCard";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    image: string;
-    description?: string;
-}
-
+import { Product } from "@/types/product.type";
 interface ProductListProps {
     products: Product[];
 }

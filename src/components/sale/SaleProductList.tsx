@@ -3,15 +3,7 @@
 import SaleProductCard from "./SaleProductCard";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-
-interface Product {
-    id: number;
-    name: string;
-    price: number;
-    originalPrice: number;
-    image: string;
-    description?: string;
-}
+import { Product } from "@/types/product.type";
 
 interface SaleProductListProps {
     products: Product[];

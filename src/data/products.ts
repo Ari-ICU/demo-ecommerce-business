@@ -1,0 +1,68 @@
+import { Product } from "@/types/product.type";
+
+export const products: Product[] = [
+    {
+        id: 1,
+        name: "Classic Sneakers",
+        price: 89.99,
+        image: "/products/sneakers.jpg",
+        originalPrice: 120.0,
+        description: "Timeless sneakers designed for comfort and style.",
+    },
+    {
+        id: 2,
+        name: "Leather Backpack",
+        price: 129.5,
+        image: "/products/backpack.jpg",
+        originalPrice: 180.0,
+        description: "Durable leather backpack for everyday use.",
+    },
+    {
+        id: 3,
+        name: "Wireless Earbuds",
+        price: 59.0,
+        image: "/products/earbuds.jpg",
+        originalPrice: 80.0,
+        description: "Crystal-clear sound and all-day battery life.",
+    },
+    {
+        id: 4,
+        name: "Classic Watch",
+        price: 199.99,
+        image: "/products/watch.jpg",
+        originalPrice: 250.0,
+        description: "Elegant watch with premium leather strap.",
+    },
+    {
+        id: 5,
+        name: "Sunglasses",
+        price: 49.99,
+        image: "/products/sunglasses.jpg",
+        originalPrice: 70.0,
+        description: "UV protection and sleek design for everyday wear.",
+    },
+    {
+        id: 6,
+        name: "Sports Cap",
+        price: 25.0,
+        image: "/products/cap.jpg",
+        originalPrice: 35.0,
+        description: "Lightweight and comfortable cap for active lifestyle.",
+    },
+    {
+        id: 7,
+        name: "Denim Jacket",
+        price: 89.99,
+        image: "/products/denim-jacket.jpg",
+        originalPrice: 130.0,
+        description: "Classic denim jacket with a modern fit.",
+    },
+    {
+        id: 8,
+        name: "Running Shoes",
+        price: 110.0,
+        image: "/products/running-shoes.jpg",
+        originalPrice: 150.0,
+        description: "High-performance running shoes for all terrains.",
+    },
+];

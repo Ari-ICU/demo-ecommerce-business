@@ -1,12 +1,12 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useCart } from "@/context/cart/CartContext";
 import { locationData } from "@/data/checkout";
+import { Coupon } from "@/types/coupons.type";
 
 type FormData = {
     fullName: string;
@@ -20,7 +20,6 @@ type FormData = {
 export default function CheckoutSection() {
     const { cartItems } = useCart();
     const [loading, setLoading] = useState(false);
-
     const [formData, setFormData] = useState<FormData>({
         fullName: "",
         phone: "",
@@ -29,6 +28,14 @@ export default function CheckoutSection() {
         delivery: "",
         paymentMethod: "",
     });
+    const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+
+    useEffect(() => {
+        const saved = localStorage.getItem("appliedCoupon");
+        if (saved) {
+            setAppliedCoupon(JSON.parse(saved));
+        }
+    }, []);
 
     const availableDistricts = useMemo(() => {
         if (!formData.city) return [];
@@ -43,7 +50,6 @@ export default function CheckoutSection() {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-
         if (name === "city") {
             setFormData((prev) => ({ ...prev, district: "", delivery: "" }));
         }
@@ -52,22 +58,28 @@ export default function CheckoutSection() {
     const handleConfirmOrder = () => {
         const { fullName, phone, city, district, delivery, paymentMethod } = formData;
         if (!fullName || !phone || !city || !district || !delivery || !paymentMethod) {
-            toast.error("Please fill out all fields");   // ✅ error toast
+            toast.error("Please fill out all fields");
             return;
         }
-
-        const orderData = { ...formData, cartItems };
+        const orderData = { ...formData, cartItems, appliedCoupon };
         localStorage.setItem("checkoutOrder", JSON.stringify(orderData));
-
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            toast.success("Order confirmed successfully!"); // ✅ success toast
-            // Redirect or payment flow here
+            toast.success("Order confirmed successfully!");
         }, 1000);
     };
 
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    let discountedTotal = subtotal;
+    if (appliedCoupon) {
+        if (appliedCoupon.discountType === "percent") {
+            discountedTotal -= (subtotal * appliedCoupon.discountValue) / 100;
+        } else {
+            discountedTotal -= appliedCoupon.discountValue;
+        }
+    }
 
     return (
         <section className="py-20 px-6 max-w-7xl mx-auto relative">
@@ -75,7 +87,6 @@ export default function CheckoutSection() {
                 Checkout
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-12" />
-
             {cartItems.length > 0 ? (
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Order Summary */}
@@ -110,9 +121,19 @@ export default function CheckoutSection() {
                                 </div>
                             ))}
                             <p className="text-base font-serif font-medium text-gray-800 mt-4">
-                                Order Total: ${total.toFixed(2)}
+                                Subtotal: ${subtotal.toFixed(2)}
                             </p>
-
+                            {appliedCoupon && (
+                                <p className="text-sm text-green-600 font-medium">
+                                    Discount Applied: -{" "}
+                                    {appliedCoupon.discountType === "percent"
+                                        ? `${appliedCoupon.discountValue}%`
+                                        : `$${appliedCoupon.discountValue.toFixed(2)}`}
+                                </p>
+                            )}
+                            <p className="text-base font-serif font-medium text-gray-800 mt-2">
+                                Order Total: ${discountedTotal.toFixed(2)}
+                            </p>
                             {/* Payment Method */}
                             <div className="mt-6">
                                 <label htmlFor="paymentMethod" className="block text-sm font-serif text-gray-600 mb-1">
@@ -132,7 +153,6 @@ export default function CheckoutSection() {
                                 </select>
                             </div>
                         </div>
-
                         <Link
                             href="/cart"
                             className="inline-flex items-center gap-2 text-gray-300 hover:text-gray-800 font-serif text-sm"
@@ -140,7 +160,6 @@ export default function CheckoutSection() {
                             <ArrowLeft className="w-4 h-4" /> Back to Cart
                         </Link>
                     </div>
-
                     {/* Checkout Form */}
                     <div className="lg:w-1/2">
                         <h3 className="text-xl font-serif font-medium text-gray-400 mb-4">
@@ -162,7 +181,6 @@ export default function CheckoutSection() {
                                         placeholder="John Doe"
                                     />
                                 </div>
-
                                 <div>
                                     <label htmlFor="phone" className="block text-sm font-serif text-gray-600 mb-1">
                                         Phone Number
@@ -177,7 +195,6 @@ export default function CheckoutSection() {
                                         placeholder="012 345 678"
                                     />
                                 </div>
-
                                 <div>
                                     <label htmlFor="city" className="block text-sm font-serif text-gray-600 mb-1">
                                         City / Province
@@ -197,7 +214,6 @@ export default function CheckoutSection() {
                                         ))}
                                     </select>
                                 </div>
-
                                 <div>
                                     <label htmlFor="district" className="block text-sm font-serif text-gray-600 mb-1">
                                         District / ស្រុក
@@ -218,7 +234,6 @@ export default function CheckoutSection() {
                                         ))}
                                     </select>
                                 </div>
-
                                 <div>
                                     <label htmlFor="delivery" className="block text-sm font-serif text-gray-600 mb-1">
                                         Delivery Method
@@ -239,7 +254,6 @@ export default function CheckoutSection() {
                                         ))}
                                     </select>
                                 </div>
-
                                 <button
                                     onClick={handleConfirmOrder}
                                     disabled={loading}

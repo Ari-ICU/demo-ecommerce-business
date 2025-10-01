@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import { CartProvider } from "@/context/cart/CartContext";
+import { LanguageProvider } from "@/context/language/LanguageContext";
 import AHeader from "../components/AHeader";
 import AFooter from "../components/AFooter";
 
@@ -31,12 +32,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CartProvider>
-          <AHeader />
-          {children}
-          <Toaster position="top-right" reverseOrder={false} />
-          <AFooter />
-        </CartProvider>
+        <LanguageProvider>
+          <CartProvider>
+            <AHeader />
+            {children}
+            <Toaster position="top-right" reverseOrder={false} />
+            <AFooter />
+          </CartProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

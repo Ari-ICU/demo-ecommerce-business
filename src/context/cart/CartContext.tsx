@@ -1,4 +1,3 @@
-// context/cart/CartContext.tsx
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
@@ -16,10 +15,10 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-    // Set initial cart items here
+    // Keep `name` as object { en, kh } for language support
     const [cartItems, setCartItems] = useState<CartItem[]>([
-        { ...products[0], quantity: 1 },
-        { ...products[1], quantity: 2 },
+        { ...products[0], name: products[0].name, quantity: 1 },
+        { ...products[1], name: products[1].name, quantity: 2 },
     ]);
 
     const addToCart = (item: CartItem) => {

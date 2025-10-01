@@ -1,10 +1,9 @@
-interface Product {
+export interface Product {
     id: number;
-    name: string;
+    name: { en: string; kh: string };
     price: number;
+    originalPrice?: number;
     image: string;
-    description?: string;
-    originalPrice?: number; // For sale products
-    images?: string[]; // Array of additional images for thumbnails
+    description?: { en: string; kh: string };
+    images?: string[]; // additional images for gallery
 }
-export type { Product };

@@ -83,7 +83,7 @@ export default function OrderDetailPage() {
                             <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-lg overflow-hidden">
                                 <Image
                                     src={item.product.image}
-                                    alt={item.product.name}
+                                    alt={item.product.name.en}
                                     fill
                                     sizes="(max-width: 640px) 96px, 112px"
                                     className="object-cover"
@@ -91,7 +91,7 @@ export default function OrderDetailPage() {
                             </div>
                             <div className="flex-1 space-y-2">
                                 <h4 className="text-base sm:text-lg font-semibold text-gray-900">
-                                    {item.product.name}
+                                    {item.product.name.en}
                                 </h4>
                                 <p className="text-sm text-gray-600">
                                     ${item.product.price.toFixed(2)} × {item.qty}

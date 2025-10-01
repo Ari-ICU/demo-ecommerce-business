@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useLanguage } from "@/context/language/LanguageContext"; // ✅ global language
 
 export default function HeroSection() {
     const [loading, setLoading] = useState(false);
     const [currentSlide, setCurrentSlide] = useState(0);
+    const { language } = useLanguage(); // ✅ get global language
 
     // Placeholder image URLs (replace with actual image URLs)
     const slides = [
@@ -33,6 +35,12 @@ export default function HeroSection() {
         setCurrentSlide(index);
     };
 
+    // Language-specific links
+    const langLink = (path: string) => {
+        const trimmed = path.replace(/^\/|\/$/g, "");
+        return `/${trimmed}/${language}`;
+    };
+
     return (
         <section className="relative flex flex-col items-center justify-center text-center py-24 px-6 min-h-[80vh] overflow-hidden">
             {/* Background Slider */}
@@ -53,19 +61,23 @@ export default function HeroSection() {
             {/* Content */}
             <div className="relative z-10">
                 <h1 className="text-4xl md:text-5xl font-serif font-medium text-white tracking-tight mb-6">
-                    Welcome to <span className="text-gray-200">YourBrand</span>
+                    {language === "en" ? "Welcome to" : "សូមស្វាគមន៍មកកាន់"}{" "}
+                    <span className="text-gray-200">YourBrand</span>
                 </h1>
                 <div className="w-16 h-0.5 bg-gray-300 mb-8 mx-auto" />
                 <p className="text-base md:text-lg text-gray-200 max-w-3xl mb-8 font-serif">
-                    Discover the latest collections, exclusive sales, and timeless styles crafted just for you.
+                    {language === "en"
+                        ? "Discover the latest collections, exclusive sales, and timeless styles crafted just for you."
+                        : "ស្វែងរកកម្រិតបច្ចុប្បន្ន, ការបញ្ចុះតម្លៃពិសេស, និងរចនាបថអចិន្រ្តៃយ៍ដែលបានបង្កើតសម្រាប់អ្នក។"}
                 </p>
                 <Link
-                    href="/sale"
+                    href={langLink("/sale")}
                     onClick={handleClick}
                     className="inline-flex items-center gap-2 rounded-md bg-gray-700 text-white px-8 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                     aria-disabled={loading}
                 >
-                    {loading ? "Loading..." : "Shop Now"} <ArrowRight className="w-4 h-4" />
+                    {loading ? (language === "en" ? "Loading..." : "កំពុងផ្ទុក...") : (language === "en" ? "Shop Now" : "ទិញឥឡូវនេះ")}
+                    <ArrowRight className="w-4 h-4" />
                 </Link>
                 {/* Navigation Dots */}
                 <div className="flex justify-center gap-2 mt-6">

@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { Product } from "@/types/product.type";
 import { CartItem } from "@/types/cart.type";
 import { useCart } from "@/context/cart/CartContext";
+import { useLanguage } from "@/context/language/LanguageContext";
 
 interface SaleProductCardProps {
     product: Product;
@@ -16,18 +17,27 @@ interface SaleProductCardProps {
 export default function SaleProductCard({ product, onAddToCart }: SaleProductCardProps) {
     const [adding, setAdding] = useState(false);
     const { addToCart } = useCart();
+    const { language } = useLanguage(); // use global language
 
     const handleAddToCart = () => {
         setAdding(true);
-        const cartItem: CartItem = { ...product, quantity: 1 };
+        const cartItem: CartItem = {
+            ...product,
+            name: product.name, // Assign the whole name object as required by CartItem
+            quantity: 1
+        };
         addToCart(cartItem);
         if (onAddToCart) {
             onAddToCart(product);
         }
         setTimeout(() => {
             setAdding(false);
-            toast.success(`${product.name} added to cart ✅`);
-        }, 800); // Reset after animation
+            toast.success(
+                language === "en"
+                    ? `${product.name.en} added to cart ✅`
+                    : `${product.name.kh} បានបន្ថែមទៅក្នុងរទេះ ✅`
+            );
+        }, 800);
     };
 
     const discount = product.originalPrice
@@ -38,27 +48,30 @@ export default function SaleProductCard({ product, onAddToCart }: SaleProductCar
         <div className="group flex flex-col rounded-md border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 w-full bg-white">
             {/* Image Section */}
             <Link
-                href={`/sale/${encodeURIComponent(product.name)}`}
+                href={`/sale/${language}/${encodeURIComponent(product.name[language])}`}
                 className="relative w-full aspect-[4/3] block overflow-hidden"
             >
+
                 <Image
                     src={product.image}
-                    alt={product.name}
+                    alt={product.name[language]} // show proper language alt
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="object-cover group-hover:scale-102 transition-transform duration-300 ease-in-out"
                     priority={product.id === 1}
                 />
                 {/* Discount Badge */}
-                <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
-                    {discount}% OFF
-                </div>
+                {discount > 0 && (
+                    <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded">
+                        {discount}% OFF
+                    </div>
+                )}
             </Link>
 
             {/* Info Section */}
             <div className="p-5 flex flex-col gap-3">
                 <h3 className="text-base sm:text-lg font-serif font-medium text-gray-800 truncate">
-                    {product.name}
+                    {product.name[language]}
                 </h3>
                 <div className="flex items-center gap-2">
                     <p className="text-sm text-gray-600 font-medium">${product.price.toFixed(2)}</p>
@@ -70,7 +83,7 @@ export default function SaleProductCard({ product, onAddToCart }: SaleProductCar
                 </div>
                 {product.description && (
                     <p className="text-sm text-gray-500 line-clamp-2">
-                        {product.description}
+                        {product.description[language]}
                     </p>
                 )}
 
@@ -80,7 +93,9 @@ export default function SaleProductCard({ product, onAddToCart }: SaleProductCar
                     disabled={adding}
                     className="mt-4 px-6 py-2 rounded-md bg-gray-700 text-white text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                 >
-                    {adding ? "Adding..." : "Add to Cart"}
+                    {adding
+                        ? language === "en" ? "Adding..." : "កំពុងបន្ថែម..."
+                        : language === "en" ? "Add to Cart" : "បន្ថែមទៅរទេះ"}
                 </button>
             </div>
         </div>

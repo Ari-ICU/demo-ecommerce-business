@@ -38,7 +38,7 @@ export default function OrderHistorySection() {
                             <p className="text-xs sm:text-sm text-gray-500">
                                 {order.items.map((i, idx) => (
                                     <span key={idx}>
-                                        {i.product.name} x{i.qty}
+                                        {i.product.name.en} x{i.qty}
                                         {idx < order.items.length - 1 ? ", " : ""}
                                     </span>
                                 ))}

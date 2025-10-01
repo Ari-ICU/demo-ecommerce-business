@@ -27,7 +27,7 @@ export default function AboutSection() {
                     : "នៅ YourBrand យើងផ្តោតសំខាន់លើការបង្កើតម៉ូដដែលមានគុណភាពខ្ពស់ និងមានស្ទីលដោយរួមបញ្ចូលភាពស្រស់ស្អាត និងភាពស្រួលស្រាយ។ ការប្រមូលផ្តុំរបស់យើងត្រូវបានរចនាឡើងដោយប្រុងប្រយ័ត្ន ដើម្បីបង្កើតស្ទីលដែលនៅតែទាក់ទាញរយៈពេលវែង។ ស្វែងរករឿងរ៉ាវរបស់យើង និងចូលរួមអបអរសាទរភាពឆ្នើម និងការច្នៃប្រឌិត។"}
             </p>
             <Link
-                href={`/${language}/sale`}
+                href={`/sale/${language}`}
                 onClick={handleClick}
                 className="inline-flex items-center gap-2 rounded-md bg-gray-700 text-white px-8 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                 aria-disabled={loading}

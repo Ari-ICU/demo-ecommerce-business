@@ -71,7 +71,7 @@ export default function HeroSection() {
                         : "ស្វែងរកកម្រិតបច្ចុប្បន្ន, ការបញ្ចុះតម្លៃពិសេស, និងរចនាបថអចិន្រ្តៃយ៍ដែលបានបង្កើតសម្រាប់អ្នក។"}
                 </p>
                 <Link
-                    href={langLink("/sale")}
+                    href={`/sale/${language}`} // ✅ include language in URL
                     onClick={handleClick}
                     className="inline-flex items-center gap-2 rounded-md bg-gray-700 text-white px-8 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                     aria-disabled={loading}

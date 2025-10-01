@@ -194,11 +194,15 @@ export default function CheckoutSection() {
                                         className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
                                     >
                                         <option value="">{lang === "kh" ? "ជ្រើសរើសទីក្រុង / ខេត្ត" : "Select City / Province"}</option>
-                                        {Object.keys(locationData).map((city) => (
-                                            <option key={city} value={city}>
-                                                {city}
-                                            </option>
-                                        ))}
+                                        {Object.keys(locationData).map((cityKey) => {
+                                            const city = locationData[cityKey as keyof typeof locationData];
+                                            const displayName = lang === "kh" ? city.kh : cityKey;
+                                            return (
+                                                <option key={cityKey} value={cityKey}>
+                                                    {displayName}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </div>
                                 <div>
@@ -214,9 +218,9 @@ export default function CheckoutSection() {
                                         disabled={!formData.city}
                                     >
                                         <option value="">{lang === "kh" ? "ជ្រើសរើសស្រុក" : "Select District"}</option>
-                                        {availableDistricts.map((district) => (
-                                            <option key={district} value={district}>
-                                                {district}
+                                        {availableDistricts.map((district, index) => (
+                                            <option key={index} value={district[lang]}>
+                                                {district[lang]}
                                             </option>
                                         ))}
                                     </select>
@@ -234,9 +238,9 @@ export default function CheckoutSection() {
                                         disabled={!formData.city}
                                     >
                                         <option value="">{lang === "kh" ? "ជ្រើសរើសវិធីដឹកជញ្ជូន" : "Select Delivery Method"}</option>
-                                        {availableDeliveryOptions.map((option) => (
-                                            <option key={option} value={option}>
-                                                {option}
+                                        {availableDeliveryOptions.map((option, index) => (
+                                            <option key={index} value={option[lang]}>
+                                                {option[lang]}
                                             </option>
                                         ))}
                                     </select>

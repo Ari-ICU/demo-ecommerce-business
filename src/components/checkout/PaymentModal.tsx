@@ -3,6 +3,8 @@ import QRCode from "react-qr-code";
 import { generateKHQRPayload } from "@/utils/payment";
 import CardPaymentView from "./CardPaymentView";
 import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
+import CryptoJS from "crypto-js"; // npm install crypto-js
 
 interface PaymentModalProps {
     open: boolean;
@@ -11,16 +13,97 @@ interface PaymentModalProps {
     amount: number;
     paymentMethod: "khqr" | "aba" | "wing" | "card";
     lang: "kh" | "en";
+    // Add these for KHQR polling (get token from Bakong developer portal: https://api-bakong.nbc.gov.kh/register)
+    bakongToken?: string; // Optional: Pass from parent or use env
+    bakongBaseUrl?: string; // Default: 'https://api-bakong.nbc.gov.kh'
 }
 
 interface KHQRPaymentViewProps {
     amount: number;
     lang: "kh" | "en";
     onSuccess: () => void;
+    bakongToken?: string;
+    bakongBaseUrl?: string;
 }
 
-const KHQRPaymentView = ({ amount, lang, onSuccess }: KHQRPaymentViewProps) => {
+const KHQRPaymentView = ({ amount, lang, onSuccess, bakongToken, bakongBaseUrl = 'https://api-bakong.nbc.gov.kh' }: KHQRPaymentViewProps) => {
+    const [isPolling, setIsPolling] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
     const formattedAmount = amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+    const payload = generateKHQRPayload(amount);
+    const md5Hash = CryptoJS.MD5(payload).toString();
+
+    useEffect(() => {
+        if (!bakongToken) {
+            console.warn('Bakong token not provided. Polling disabled.');
+            return;
+        }
+
+        setIsPolling(true);
+
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch(`${bakongBaseUrl}/v1/check_transaction_by_md5`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${bakongToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ md5: md5Hash }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.responseCode === 0 && 
+                    data.data?.amount === amount && 
+                    data.data?.currency === 'USD' && 
+                    data.data?.toAccountId === 'merchant@bakong' // Match your merchant account from generateKHQRPayload
+                ) {
+                    setPaymentStatus('success');
+                    setIsPolling(false);
+                    clearInterval(interval);
+                    onSuccess();
+                }
+            } catch (err) {
+                console.error('Polling error:', err);
+                setPaymentStatus('error');
+                setIsPolling(false);
+                clearInterval(interval);
+            }
+        }, 3000); // Poll every 3 seconds
+
+        // Stop polling after 5 minutes
+        const timeout = setTimeout(() => {
+            setIsPolling(false);
+            clearInterval(interval);
+        }, 300000);
+
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeout);
+        };
+    }, [amount, onSuccess, md5Hash, bakongToken, bakongBaseUrl]);
+
+    if (paymentStatus === 'success') {
+        return (
+            <div className="flex flex-col items-center">
+                <p className="text-green-600 font-semibold">{lang === "kh" ? "ការទូទាត់ជោគជ័យ!" : "Payment successful!"}</p>
+            </div>
+        );
+    }
+
+    if (paymentStatus === 'error') {
+        return (
+            <div className="flex flex-col items-center">
+                <p className="text-red-600">{lang === "kh" ? "កំហុសក្នុងការផ្ទៀងផ្ទាត់" : "Verification error. Please try again."}</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center">
@@ -39,12 +122,15 @@ const KHQRPaymentView = ({ amount, lang, onSuccess }: KHQRPaymentViewProps) => {
                     <p className="text-3xl font-extrabold text-gray-900 text-center tracking-tight">
                         ${formattedAmount}
                     </p>
+                    {isPolling && (
+                        <p className="text-xs text-blue-600 mt-2">Polling for payment confirmation...</p>
+                    )}
                 </div>
 
                 <div className="p-6 flex justify-center">
                     <div className="p-2 border border-gray-200 rounded-md shadow-inner">
                         <QRCode
-                            value={generateKHQRPayload(amount)}
+                            value={payload}
                             size={180}
                             level="M"
                         />
@@ -61,7 +147,16 @@ const KHQRPaymentView = ({ amount, lang, onSuccess }: KHQRPaymentViewProps) => {
     );
 };
 
-export default function PaymentModal({ open, onClose, onSuccess, amount, paymentMethod, lang }: PaymentModalProps) {
+export default function PaymentModal({ 
+    open, 
+    onClose, 
+    onSuccess, 
+    amount, 
+    paymentMethod, 
+    lang, 
+    bakongToken, 
+    bakongBaseUrl 
+}: PaymentModalProps) {
     if (!open) return null;
 
     // 🔹 Unified success handler
@@ -88,7 +183,13 @@ export default function PaymentModal({ open, onClose, onSuccess, amount, payment
 
                 <div className="text-center">
                     {paymentMethod === "khqr" && (
-                        <KHQRPaymentView amount={amount} lang={lang} onSuccess={handleSuccess} />
+                        <KHQRPaymentView 
+                            amount={amount} 
+                            lang={lang} 
+                            onSuccess={handleSuccess}
+                            bakongToken={bakongToken}
+                            bakongBaseUrl={bakongBaseUrl}
+                        />
                     )}
 
                     {paymentMethod === "aba" && (

@@ -8,6 +8,7 @@ import { useCart } from "@/context/cart/CartContext";
 import { useLanguage } from "@/context/language/LanguageContext";
 import { locationData } from "@/data/checkout";
 import { Coupon } from "@/types/coupons.type";
+import PaymentModal from "@/components/checkout/PaymentModal";
 
 type FormData = {
     fullName: string;
@@ -22,6 +23,7 @@ export default function CheckoutSection() {
     const { cartItems } = useCart();
     const { language: lang } = useLanguage();
     const [loading, setLoading] = useState(false);
+    const [showPayment, setShowPayment] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         fullName: "",
         phone: "",
@@ -61,11 +63,24 @@ export default function CheckoutSection() {
         }
         const orderData = { ...formData, cartItems, appliedCoupon };
         localStorage.setItem("checkoutOrder", JSON.stringify(orderData));
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            toast.success(lang === "kh" ? "បញ្ជាទិញបានជោគជ័យ!" : "Order confirmed successfully!");
-        }, 1000);
+        if (paymentMethod === "cod") {
+            setLoading(true);
+            setTimeout(() => {
+                setLoading(false);
+                toast.success(lang === "kh" ? "បញ្ជាទិញបានជោគជ័យ!" : "Order confirmed successfully!");
+            }, 1000);
+        } else {
+            setShowPayment(true);
+        }
+    };
+
+    const handlePaymentSuccess = () => {
+        toast.success(lang === "kh" ? "ការទូទាត់បានជោគជ័យ! បញ្ជាទិញបានបញ្ជាក់!" : "Payment successful! Order confirmed!");
+        setShowPayment(false);
+    };
+
+    const handleClosePayment = () => {
+        setShowPayment(false);
     };
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -78,204 +93,223 @@ export default function CheckoutSection() {
     }
 
     return (
-        <section className="py-20 px-6 max-w-7xl mx-auto relative">
-            <h2 className="text-3xl md:text-4xl font-serif font-medium text-gray-400 mb-10 text-center">
-                {lang === "kh" ? "បញ្ជាទិញ" : "Checkout"}
-            </h2>
-            <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-12" />
-            {cartItems.length > 0 ? (
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Order Summary */}
-                    <div className="lg:w-1/2">
-                        <h3 className="text-xl font-serif font-medium text-gray-400 mb-4">
-                            {lang === "kh" ? "សង្ខេបការបញ្ជាទិញ" : "Order Summary"}
-                        </h3>
-                        <div className="bg-white rounded-md border border-gray-200 p-6 mb-6">
-                            {cartItems.map((item) => (
-                                <div key={item.id} className="flex items-center gap-4 py-4 border-b border-gray-200 last:border-b-0">
-                                    <div className="relative w-16 h-16">
-                                        <Image src={item.image} alt={item.name[lang]} fill sizes="64px" className="object-cover rounded" />
+        <>
+            <section className="py-20 px-6 max-w-7xl mx-auto relative">
+                <h2 className="text-3xl md:text-4xl font-serif font-medium text-gray-400 mb-10 text-center">
+                    {lang === "kh" ? "បញ្ជាទិញ" : "Checkout"}
+                </h2>
+                <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-12" />
+                {cartItems.length > 0 ? (
+                    <div className="flex flex-col lg:flex-row gap-8">
+                        {/* Order Summary */}
+                        <div className="lg:w-1/2">
+                            <h3 className="text-xl font-serif font-medium text-gray-400 mb-4">
+                                {lang === "kh" ? "សង្ខេបការបញ្ជាទិញ" : "Order Summary"}
+                            </h3>
+                            <div className="bg-white rounded-md border border-gray-200 p-6 mb-6">
+                                {cartItems.map((item) => (
+                                    <div key={item.id} className="flex items-center gap-4 py-4 border-b border-gray-200 last:border-b-0">
+                                        <div className="relative w-16 h-16">
+                                            <Image src={item.image} alt={item.name[lang]} fill sizes="64px" className="object-cover rounded" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h4 className="text-base font-serif font-medium text-gray-800">{item.name[lang]}</h4>
+                                            <p className="text-sm text-gray-600">
+                                                ${item.price.toFixed(2)} x {item.quantity}
+                                            </p>
+                                            <p className="text-sm font-medium text-gray-800">
+                                                {lang === "kh" ? "សរុប" : "Total"}: ${(item.price * item.quantity).toFixed(2)}
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <h4 className="text-base font-serif font-medium text-gray-800">{item.name[lang]}</h4>
-                                        <p className="text-sm text-gray-600">
-                                            ${item.price.toFixed(2)} x {item.quantity}
-                                        </p>
-                                        <p className="text-sm font-medium text-gray-800">
-                                            {lang === "kh" ? "សរុប" : "Total"}: ${(item.price * item.quantity).toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                            <p className="text-base font-serif font-medium text-gray-800 mt-4">
-                                {lang === "kh" ? "Subtotal" : "Subtotal"}: ${subtotal.toFixed(2)}
-                            </p>
-                            {appliedCoupon && (
-                                <p className="text-sm text-green-600 font-medium">
-                                    {lang === "kh" ? "បញ្ចុះតម្លៃបានប្រើ" : "Discount Applied"}:{" "}
-                                    {appliedCoupon.discountType === "percent"
-                                        ? `${appliedCoupon.discountValue}%`
-                                        : `$${appliedCoupon.discountValue.toFixed(2)}`}
+                                ))}
+                                <p className="text-base font-serif font-medium text-gray-800 mt-4">
+                                    {lang === "kh" ? "Subtotal" : "Subtotal"}: ${subtotal.toFixed(2)}
                                 </p>
-                            )}
-                            <p className="text-base font-serif font-medium text-gray-800 mt-2">
-                                {lang === "kh" ? "សរុបបញ្ជាទិញ" : "Order Total"}: ${discountedTotal.toFixed(2)}
-                            </p>
-                            {/* Payment Method */}
-                            <div className="mt-6">
-                                <label htmlFor="paymentMethod" className="block text-sm font-serif text-gray-600 mb-1">
-                                    {lang === "kh" ? "វិធីសាស្រ្តទូទាត់" : "Payment Method"}
-                                </label>
-                                <select
-                                    id="paymentMethod"
-                                    name="paymentMethod"
-                                    value={formData.paymentMethod || ""}
-                                    onChange={handleInputChange}
-                                    className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                >
-                                    <option value="">{lang === "kh" ? "ជ្រើសរើសវិធីទូទាត់" : "Select Payment Method"}</option>
-                                    <option value="khqr">{lang === "kh" ? "Bakong KHQR" : "Bakong KHQR"}</option>
-                                    <option value="card">{lang === "kh" ? "កាតឥណទាន / ឌីប៊ីត" : "Credit / Debit Card"}</option>
-                                    <option value="cod">{lang === "kh" ? "សាច់ប្រាក់ពេលទទួល" : "Cash on Delivery"}</option>
-                                </select>
+                                {appliedCoupon && (
+                                    <p className="text-sm text-green-600 font-medium">
+                                        {lang === "kh" ? "បញ្ចុះតម្លៃបានប្រើ" : "Discount Applied"}:{" "}
+                                        {appliedCoupon.discountType === "percent"
+                                            ? `${appliedCoupon.discountValue}%`
+                                            : `$${appliedCoupon.discountValue.toFixed(2)}`}
+                                    </p>
+                                )}
+                                <p className="text-base font-serif font-medium text-gray-800 mt-2">
+                                    {lang === "kh" ? "សរុបបញ្ជាទិញ" : "Order Total"}: ${discountedTotal.toFixed(2)}
+                                </p>
+                                {/* Payment Method */}
+                                <div className="mt-6">
+                                    <label htmlFor="paymentMethod" className="block text-sm font-serif text-gray-600 mb-1">
+                                        {lang === "kh" ? "វិធីសាស្រ្តទូទាត់" : "Payment Method"}
+                                    </label>
+                                    <select
+                                        id="paymentMethod"
+                                        name="paymentMethod"
+                                        value={formData.paymentMethod || ""}
+                                        onChange={handleInputChange}
+                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                    >
+                                        <option value="">{lang === "kh" ? "ជ្រើសរើសវិធីទូទាត់" : "Select Payment Method"}</option>
+                                        <option value="khqr">{lang === "kh" ? "បាកុង KHQR" : "Bakong KHQR"}</option>
+                                        <option value="aba">{lang === "kh" ? "ABA Pay" : "ABA Pay"}</option>
+                                        <option value="wing">{lang === "kh" ? "Wing" : "Wing"}</option>
+                                        <option value="card">{lang === "kh" ? "កាតឥណទាន / ឌីប៊ីត" : "Credit / Debit Card"}</option>
+                                        <option value="cod">{lang === "kh" ? "សាច់ប្រាក់ពេលទទួល" : "Cash on Delivery"}</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <Link
+                                href={`/cart/${lang}`}
+                                className="inline-flex items-center gap-2 text-gray-300 hover:text-gray-800 font-serif text-sm"
+                            >
+                                <ArrowLeft className="w-4 h-4" /> {lang === "kh" ? "ត្រឡប់ទៅកន្ត្រក" : "Back to Cart"}
+                            </Link>
+                        </div>
+                        {/* Checkout Form */}
+                        <div className="lg:w-1/2">
+                            <h3 className="text-xl font-serif font-medium text-gray-400 mb-4">
+                                {lang === "kh" ? "ព័ត៌មានដឹកជញ្ជូន និងវិក្កយបត្រ" : "Shipping & Billing Details"}
+                            </h3>
+                            <div className="bg-white rounded-md border border-gray-200 p-6">
+                                <div className="flex flex-col gap-4">
+                                    <div>
+                                        <label htmlFor="fullName" className="block text-sm font-serif text-gray-600 mb-1">
+                                            {lang === "kh" ? "ឈ្មោះពេញ" : "Full Name"}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="fullName"
+                                            name="fullName"
+                                            value={formData.fullName}
+                                            onChange={handleInputChange}
+                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                            placeholder={lang === "kh" ? "ឈ្មោះរបស់អ្នក" : "John Doe"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="phone" className="block text-sm font-serif text-gray-600 mb-1">
+                                            {lang === "kh" ? "លេខទូរស័ព្ទ" : "Phone Number"}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="phone"
+                                            name="phone"
+                                            value={formData.phone}
+                                            onChange={handleInputChange}
+                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                            placeholder={lang === "kh" ? "០១២ ៣៤៥ ៦៧៨" : "012 345 678"}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="city" className="block text-sm font-serif text-gray-600 mb-1">
+                                            {lang === "kh" ? "ទីក្រុង / ខេត្ត" : "City / Province"}
+                                        </label>
+                                        <select
+                                            id="city"
+                                            name="city"
+                                            value={formData.city}
+                                            onChange={handleInputChange}
+                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                        >
+                                            <option value="">{lang === "kh" ? "ជ្រើសរើសទីក្រុង / ខេត្ត" : "Select City / Province"}</option>
+                                            {Object.keys(locationData).map((cityKey) => {
+                                                const city = locationData[cityKey as keyof typeof locationData];
+                                                const displayName = lang === "kh" ? city.kh : cityKey;
+                                                return (
+                                                    <option key={cityKey} value={cityKey}>
+                                                        {displayName}
+                                                    </option>
+                                                );
+                                            })}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="district" className="block text-sm font-serif text-gray-600 mb-1">
+                                            {lang === "kh" ? "ស្រុក / ក្រុង" : "District"}
+                                        </label>
+                                        <select
+                                            id="district"
+                                            name="district"
+                                            value={formData.district}
+                                            onChange={handleInputChange}
+                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                            disabled={!formData.city}
+                                        >
+                                            <option value="">{lang === "kh" ? "ជ្រើសរើសស្រុក" : "Select District"}</option>
+                                            {availableDistricts.map((district, index) => (
+                                                <option key={index} value={district[lang]}>
+                                                    {district[lang]}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="delivery" className="block text-sm font-serif text-gray-600 mb-1">
+                                            {lang === "kh" ? "វិធីដឹកជញ្ជូន" : "Delivery Method"}
+                                        </label>
+                                        <select
+                                            id="delivery"
+                                            name="delivery"
+                                            value={formData.delivery}
+                                            onChange={handleInputChange}
+                                            className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
+                                            disabled={!formData.city}
+                                        >
+                                            <option value="">{lang === "kh" ? "ជ្រើសរើសវិធីដឹកជញ្ជូន" : "Select Delivery Method"}</option>
+                                            {availableDeliveryOptions.map((option, index) => (
+                                                <option key={index} value={option[lang]}>
+                                                    {option[lang]}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <button
+                                        onClick={handleConfirmOrder}
+                                        disabled={loading}
+                                        className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 w-full mt-4"
+                                    >
+                                        {loading
+                                            ? lang === "kh"
+                                                ? "កំពុងដំណើរការ..."
+                                                : "Processing..."
+                                            : lang === "kh"
+                                            ? "បញ្ជាក់ការបញ្ជាទិញ"
+                                            : "Confirm Order"}
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                ) : (
+                    <div className="text-center">
+                        <p className="text-base text-gray-500 font-serif mb-6">
+                            {lang === "kh" ? "កន្ត្រករបស់អ្នកទទេ" : "Your cart is empty."}
+                        </p>
                         <Link
-                            href={`/cart/${lang}`}
-                            className="inline-flex items-center gap-2 text-gray-300 hover:text-gray-800 font-serif text-sm"
+                            href={`/sale/${lang}`}
+                            className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
                         >
-                            <ArrowLeft className="w-4 h-4" /> {lang === "kh" ? "ត្រឡប់ទៅកន្ត្រក" : "Back to Cart"}
+                            {lang === "kh" ? "ទិញឥឡូវ" : "Shop Now"} <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
-                    {/* Checkout Form */}
-                    <div className="lg:w-1/2">
-                        <h3 className="text-xl font-serif font-medium text-gray-400 mb-4">
-                            {lang === "kh" ? "ព័ត៌មានដឹកជញ្ជូន និងវិក្កយបត្រ" : "Shipping & Billing Details"}
-                        </h3>
-                        <div className="bg-white rounded-md border border-gray-200 p-6">
-                            <div className="flex flex-col gap-4">
-                                <div>
-                                    <label htmlFor="fullName" className="block text-sm font-serif text-gray-600 mb-1">
-                                        {lang === "kh" ? "ឈ្មោះពេញ" : "Full Name"}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="fullName"
-                                        name="fullName"
-                                        value={formData.fullName}
-                                        onChange={handleInputChange}
-                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                        placeholder={lang === "kh" ? "ឈ្មោះរបស់អ្នក" : "John Doe"}
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="phone" className="block text-sm font-serif text-gray-600 mb-1">
-                                        {lang === "kh" ? "លេខទូរស័ព្ទ" : "Phone Number"}
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="phone"
-                                        name="phone"
-                                        value={formData.phone}
-                                        onChange={handleInputChange}
-                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                        placeholder={lang === "kh" ? "០១២ ៣៤៥ ៦៧៨" : "012 345 678"}
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="city" className="block text-sm font-serif text-gray-600 mb-1">
-                                        {lang === "kh" ? "ទីក្រុង / ខេត្ត" : "City / Province"}
-                                    </label>
-                                    <select
-                                        id="city"
-                                        name="city"
-                                        value={formData.city}
-                                        onChange={handleInputChange}
-                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                    >
-                                        <option value="">{lang === "kh" ? "ជ្រើសរើសទីក្រុង / ខេត្ត" : "Select City / Province"}</option>
-                                        {Object.keys(locationData).map((cityKey) => {
-                                            const city = locationData[cityKey as keyof typeof locationData];
-                                            const displayName = lang === "kh" ? city.kh : cityKey;
-                                            return (
-                                                <option key={cityKey} value={cityKey}>
-                                                    {displayName}
-                                                </option>
-                                            );
-                                        })}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label htmlFor="district" className="block text-sm font-serif text-gray-600 mb-1">
-                                        {lang === "kh" ? "ស្រុក / ក្រុង" : "District"}
-                                    </label>
-                                    <select
-                                        id="district"
-                                        name="district"
-                                        value={formData.district}
-                                        onChange={handleInputChange}
-                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                        disabled={!formData.city}
-                                    >
-                                        <option value="">{lang === "kh" ? "ជ្រើសរើសស្រុក" : "Select District"}</option>
-                                        {availableDistricts.map((district, index) => (
-                                            <option key={index} value={district[lang]}>
-                                                {district[lang]}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div>
-                                    <label htmlFor="delivery" className="block text-sm font-serif text-gray-600 mb-1">
-                                        {lang === "kh" ? "វិធីដឹកជញ្ជូន" : "Delivery Method"}
-                                    </label>
-                                    <select
-                                        id="delivery"
-                                        name="delivery"
-                                        value={formData.delivery}
-                                        onChange={handleInputChange}
-                                        className="w-full text-black p-2 border border-gray-300 rounded text-sm font-serif"
-                                        disabled={!formData.city}
-                                    >
-                                        <option value="">{lang === "kh" ? "ជ្រើសរើសវិធីដឹកជញ្ជូន" : "Select Delivery Method"}</option>
-                                        {availableDeliveryOptions.map((option, index) => (
-                                            <option key={index} value={option[lang]}>
-                                                {option[lang]}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <button
-                                    onClick={handleConfirmOrder}
-                                    disabled={loading}
-                                    className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 w-full mt-4"
-                                >
-                                    {loading
-                                        ? lang === "kh"
-                                            ? "កំពុងដំណើរការ..."
-                                            : "Processing..."
-                                        : lang === "kh"
-                                        ? "បញ្ជាក់ការបញ្ជាទិញ"
-                                        : "Confirm Order"}{" "}
-                                    <ArrowRight className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            ) : (
-                <div className="text-center">
-                    <p className="text-base text-gray-500 font-serif mb-6">
-                        {lang === "kh" ? "កន្ត្រករបស់អ្នកទទេ" : "Your cart is empty."}
-                    </p>
-                    <Link
-                        href={`/sale/${lang}`}
-                        className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
-                    >
-                        {lang === "kh" ? "ទិញឥឡូវ" : "Shop Now"} <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
-            )}
-        </section>
+                )}
+            </section>
+            <PaymentModal
+                open={showPayment}
+                onClose={handleClosePayment}
+                onSuccess={handlePaymentSuccess}
+                amount={discountedTotal}
+                paymentMethod={
+                    formData.paymentMethod === "khqr" ||
+                    formData.paymentMethod === "aba" ||
+                    formData.paymentMethod === "wing" ||
+                    formData.paymentMethod === "card"
+                        ? formData.paymentMethod
+                        : "khqr"
+                }
+                lang={lang}
+            />
+        </>
     );
 }

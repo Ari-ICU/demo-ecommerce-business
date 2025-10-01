@@ -176,7 +176,7 @@ export default function CartSection() {
                         Your cart is empty.
                     </p>
                     <Link
-                        href="/collections"
+                        href="/sale"
                         className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800"
                     >
                         Shop Now <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />

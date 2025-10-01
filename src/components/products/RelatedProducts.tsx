@@ -1,6 +1,6 @@
 "use client";
 
-import ProductCard from "./ProductCard";
+import SaleProductCard from "../sale/SaleProductCard";
 import { useEffect, useRef, useState } from "react";
 import { products as allProducts } from "@/data/products";
 
@@ -53,7 +53,7 @@ export default function RelatedProducts({ currentProductId }: RelatedProductsPro
                             }`}
                             style={{ transitionDelay: `${index * 200}ms` }}
                         >
-                            <ProductCard product={product} />
+                            <SaleProductCard product={product} />
                         </div>
                     ))}
                 </div>

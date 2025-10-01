@@ -1,9 +1,6 @@
 "use client";
 
-import ProductCard from "./ProductCard";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import SaleProductCard from "../sale/SaleProductCard";
 import { Product } from "@/types/product.type";
 
 interface FeaturedProductsProps {
@@ -11,14 +8,6 @@ interface FeaturedProductsProps {
 }
 
 export default function FeaturedProducts({ products }: FeaturedProductsProps) {
-    const [loading, setLoading] = useState(false);
-
-    const handleClick = () => {
-        setLoading(true);
-        // Simulate async action (e.g., navigation)
-        setTimeout(() => setLoading(false), 1000);
-    };
-
     // Limit to first 6 products
     const displayedProducts = products.slice(0, 6);
 
@@ -32,27 +21,13 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
             {displayedProducts.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
                     {displayedProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <SaleProductCard key={product.id} product={product} />
                     ))}
                 </div>
             ) : (
                 <p className="text-center text-gray-500 text-base font-serif">
                     No featured products available at this time.
                 </p>
-            )}
-
-            {/* See More Button */}
-            {products.length > 6 && (
-                <div className="flex justify-center mt-12">
-                    <Link
-                        href="/collections"
-                        onClick={handleClick}
-                        className="inline-flex items-center gap-2 rounded-md bg-gray-700 text-white px-8 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-                        aria-disabled={loading}
-                    >
-                        {loading ? "Loading..." : "See More"} <ArrowRight className="w-4 h-4" />
-                    </Link>
-                </div>
             )}
         </section>
     );

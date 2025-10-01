@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { User, ShoppingCart, Store, Search, Menu, X, Package, Percent, Info } from "lucide-react";
+import { User, ShoppingCart, Store, Search, Menu, X, Percent, Info } from "lucide-react";
 import { useCart } from "@/context/cart/CartContext";
 
 export default function AHeader() {
@@ -25,12 +25,8 @@ export default function AHeader() {
                             <span className="font-bold text-lg">YourBrand</span>
                         </Link>
 
-                        {/* Desktop Navigation */}
+                        {/* Desktop Navigation (Collections removed) */}
                         <nav className="hidden lg:flex items-center gap-6 text-sm text-muted-foreground">
-                            <Link href="/collections" className="flex items-center gap-2 hover:underline">
-                                <Package className="w-5 h-5" />
-                                Collections
-                            </Link>
                             <Link href="/sale" className="flex items-center gap-2 hover:underline">
                                 <Percent className="w-5 h-5" />
                                 Sale
@@ -92,7 +88,7 @@ export default function AHeader() {
                     </div>
                 </div>
 
-                {/* Mobile Navigation */}
+                {/* Mobile Navigation (Collections removed) */}
                 {isMenuOpen && (
                     <div className="lg:hidden border-t border-black/5 dark:border-white/8">
                         <nav className="flex flex-col p-4 gap-4 text-sm text-muted-foreground">
@@ -118,10 +114,6 @@ export default function AHeader() {
                             <Link href="/account" className="flex items-center gap-2 hover:underline" onClick={toggleMenu}>
                                 <User className="w-5 h-5" />
                                 Account
-                            </Link>
-                            <Link href="/collections" className="flex items-center gap-2 hover:underline" onClick={toggleMenu}>
-                                <Package className="w-5 h-5" />
-                                Collections
                             </Link>
                             <Link href="/sale" className="flex items-center gap-2 hover:underline" onClick={toggleMenu}>
                                 <Percent className="w-5 h-5" />

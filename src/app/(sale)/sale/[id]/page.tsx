@@ -10,14 +10,14 @@ interface SaleDetailPageProps {
 }
 
 export default function SaleDetailPage({ params }: SaleDetailPageProps) {
-    // Parse the URL parameter as number
-    const productId = Number(params.id);
+    // Decode to handle spaces & special chars
+    const productName = decodeURIComponent(params.id);
 
-    // Find product by id
-    const product = products.find((p) => p.id === productId);
+    const product = products.find((p) => p.name === productName);
 
-    // If product not found, show 404
-    if (!product) notFound();
+    if (!product) {
+        notFound();
+    }
 
     return (
         <main className="min-h-screen">

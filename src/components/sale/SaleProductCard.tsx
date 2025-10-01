@@ -3,7 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { Product } from "@/types/product.type";
+import { CartItem } from "@/types/cart.type";
+import { useCart } from "@/context/cart/CartContext";
 
 interface SaleProductCardProps {
     product: Product;
@@ -12,14 +15,21 @@ interface SaleProductCardProps {
 
 export default function SaleProductCard({ product, onAddToCart }: SaleProductCardProps) {
     const [adding, setAdding] = useState(false);
+    const { addToCart } = useCart();
 
     const handleAddToCart = () => {
+        setAdding(true);
+        const cartItem: CartItem = { ...product, quantity: 1 };
+        addToCart(cartItem);
         if (onAddToCart) {
-            setAdding(true);
             onAddToCart(product);
-            setTimeout(() => setAdding(false), 800); // Reset after animation
         }
+        setTimeout(() => {
+            setAdding(false);
+            toast.success(`${product.name} added to cart ✅`);
+        }, 800); // Reset after animation
     };
+
     const discount = product.originalPrice
         ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
         : 0;
@@ -28,10 +38,9 @@ export default function SaleProductCard({ product, onAddToCart }: SaleProductCar
         <div className="group flex flex-col rounded-md border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 w-full bg-white">
             {/* Image Section */}
             <Link
-                href={`/sale/${(product.id)}`}
+                href={`/sale/${encodeURIComponent(product.name)}`}
                 className="relative w-full aspect-[4/3] block overflow-hidden"
             >
-
                 <Image
                     src={product.image}
                     alt={product.name}

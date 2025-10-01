@@ -26,7 +26,7 @@ export default function AboutSection() {
                 sophistication and craftsmanship.
             </p>
             <Link
-                href="/collections"
+                href="/sale"
                 onClick={handleClick}
                 className="inline-flex items-center gap-2 rounded-md bg-gray-700 text-white px-8 py-3 text-sm font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
                 aria-disabled={loading}

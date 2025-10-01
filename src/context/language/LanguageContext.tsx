@@ -31,11 +31,24 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
     const segments = pathname.split("/").filter(Boolean);
 
-    // If the first segment exists and the second segment is the current language
+    if (segments.length === 0) {
+        // Root page "/" → just add language
+        router.push(`/${newLang}`);
+        return;
+    }
+
+    // Home page like "/en" or "/kh"
+    if (segments.length === 1 && (segments[0] === "en" || segments[0] === "kh")) {
+        segments[0] = newLang;
+        router.push("/" + segments.join("/"));
+        return;
+    }
+
+    // Other pages
     if (segments.length >= 2 && (segments[1] === "en" || segments[1] === "kh")) {
         segments[1] = newLang;
 
-        // Special handling for /sale/[lang]/[product] to change product name
+        // Special handling for /sale/[lang]/[product]
         if (segments[0] === "sale" && segments.length > 2) {
             const product = products.find(
                 (p) => p.name[language] === decodeURIComponent(segments[2])
@@ -44,11 +57,12 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
                 segments[2] = encodeURIComponent(product.name[newLang]);
             }
         }
-    } else {
-        // Fallback: just add language as second segment
-        segments.splice(1, 0, newLang);
+        router.push("/" + segments.join("/"));
+        return;
     }
 
+    // Fallback for other pages without language
+    segments.unshift(newLang);
     router.push("/" + segments.join("/"));
 };
 

@@ -4,9 +4,11 @@ import { useState } from "react";
 import { Calendar, Package, DollarSign, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { orders as mockOrders } from "@/data/orders";
+import { useLanguage } from "@/context/language/LanguageContext";
 
 export default function OrderHistorySection() {
     const [orders] = useState(mockOrders);
+    const { language } = useLanguage();
 
     return (
         <section className="space-y-6">
@@ -32,13 +34,15 @@ export default function OrderHistorySection() {
 
                             <div className="flex items-center gap-2 text-gray-600 text-xs sm:text-sm">
                                 <DollarSign className="w-4 h-4" />
-                                <span>Total: ${order.total.toFixed(2)}</span>
+                                <span>
+                                    {language === "en" ? "Total" : "សរុប"}: ${order.total.toFixed(2)}
+                                </span>
                             </div>
 
                             <p className="text-xs sm:text-sm text-gray-500">
                                 {order.items.map((i, idx) => (
                                     <span key={idx}>
-                                        {i.product.name.en} x{i.qty}
+                                        {language === "en" ? i.product.name.en : i.product.name.kh} x{i.qty}
                                         {idx < order.items.length - 1 ? ", " : ""}
                                     </span>
                                 ))}
@@ -53,29 +57,37 @@ export default function OrderHistorySection() {
                                         : "bg-red-100 text-red-700"
                                 }`}
                             >
-                                {order.status}
+                                {language === "en"
+                                    ? order.status
+                                    : order.status === "Delivered"
+                                    ? "បានដឹកជញ្ជូន"
+                                    : order.status === "Processing"
+                                    ? "កំពុងដំណើរការ"
+                                    : "បរាជ័យ"}
                             </span>
                         </div>
 
                         {/* View Details */}
                         <Link
-                            href={`/orders/${order.id}`}
+                            href={`/${language}/orders/${order.id}`} // ✅ include language in URL
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-700 text-white text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors self-start sm:self-center"
                         >
-                            View Details <ArrowRight className="w-4 h-4" />
+                            {language === "en" ? "View Details" : "មើលព័ត៌មានលម្អិត"} <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
                 ))
             ) : (
                 <div className="text-center py-12">
                     <p className="text-gray-500 text-sm sm:text-base">
-                        You have no order history yet.
+                        {language === "en"
+                            ? "You have no order history yet."
+                            : "អ្នកមិនមានប្រវត្តិកម្មវិធីបញ្ជាទិញនៅឡើយទេ។"}
                     </p>
                     <Link
-                        href="/sale"
+                        href={`/${language}/sale`} // ✅ include language in URL
                         className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800"
                     >
-                        Start Shopping
+                        {language === "en" ? "Start Shopping" : "ចាប់ផ្តើមទិញ"}
                     </Link>
                 </div>
             )}

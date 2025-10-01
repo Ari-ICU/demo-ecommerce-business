@@ -135,7 +135,7 @@ export default function ProductDetailSection({ product }: ProductDetailSectionPr
                             <ShoppingCart className="w-4 h-4" />
                         </button>
                         <Link
-                            href={`/${language}/sale`}
+                            href={`/sale/${language}`}
                             className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-400 font-serif text-sm"
                         >
                             <ArrowLeft className="w-4 h-4" /> {language === "en" ? "Back to Collections" : "ត្រឡប់ទៅកាន់ការប្រមូល"}

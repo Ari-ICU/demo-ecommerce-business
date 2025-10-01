@@ -141,7 +141,7 @@ export default function CheckoutSection() {
                             </div>
                         </div>
                         <Link
-                            href="/cart"
+                            href={`/cart/${lang}`}
                             className="inline-flex items-center gap-2 text-gray-300 hover:text-gray-800 font-serif text-sm"
                         >
                             <ArrowLeft className="w-4 h-4" /> {lang === "kh" ? "ត្រឡប់ទៅកន្ត្រក" : "Back to Cart"}

@@ -27,17 +27,17 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link href={`/${language}/sale`} className="hover:underline">
+                                <Link href={`/sale/${language}`} className="hover:underline">
                                     {language === "en" ? "Sale" : "បញ្ចុះតម្លៃ"}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${language}/about`} className="hover:underline">
+                                <Link href={`/about/${language}`} className="hover:underline">
                                     {language === "en" ? "About Us" : "អំពីយើង"}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${language}/contact`} className="hover:underline">
+                                <Link href={`/contact/${language}`} className="hover:underline">
                                     {language === "en" ? "Contact" : "ទំនាក់ទំនង"}
                                 </Link>
                             </li>
@@ -51,22 +51,22 @@ export default function Footer() {
                         </h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link href={`/${language}/account`} className="hover:underline">
+                                <Link href={`/account/${language}`} className="hover:underline">
                                     {language === "en" ? "My Account" : "គណនីរបស់ខ្ញុំ"}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${language}/orders`} className="hover:underline">
+                                <Link href={`/orders/${language}`} className="hover:underline">
                                     {language === "en" ? "Orders" : "ការកម្មង់"}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${language}/shipping`} className="hover:underline">
+                                <Link href={`/shipping/${language}`} className="hover:underline">
                                     {language === "en" ? "Shipping & Returns" : "ការដឹកជញ្ជូន និងការបង្វិល"}
                                 </Link>
                             </li>
                             <li>
-                                <Link href={`/${language}/faq`} className="hover:underline">
+                                <Link href={`/faq/${language}`} className="hover:underline">
                                     {language === "en" ? "FAQ" : "សំណួរញឹកញាប់"}
                                 </Link>
                             </li>
@@ -102,10 +102,10 @@ export default function Footer() {
                             : `© ${new Date().getFullYear()} YourBrand. សិទ្ធិគ្រប់យ៉ាងបានរក្សា។`}
                     </p>
                     <div className="flex gap-4 mt-2 sm:mt-0">
-                        <Link href={`/${language}/privacy`} className="hover:underline">
+                        <Link href={`/privacy/${language}`} className="hover:underline">
                             {language === "en" ? "Privacy Policy" : "គោលការណ៍ឯកជនភាព"}
                         </Link>
-                        <Link href={`/${language}/terms`} className="hover:underline">
+                        <Link href={`/terms/${language}`} className="hover:underline">
                             {language === "en" ? "Terms of Service" : "លក្ខខណ្ឌសេវា"}
                         </Link>
                     </div>

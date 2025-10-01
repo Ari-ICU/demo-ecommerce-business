@@ -3,7 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
+import toast from "react-hot-toast";
 import { useCart } from "@/context/cart/CartContext";
 import { locationData } from "@/data/checkout";
 
@@ -19,8 +20,6 @@ type FormData = {
 export default function CheckoutSection() {
     const { cartItems } = useCart();
     const [loading, setLoading] = useState(false);
-    const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
-    const toastId = useRef(0);
 
     const [formData, setFormData] = useState<FormData>({
         fullName: "",
@@ -41,14 +40,6 @@ export default function CheckoutSection() {
         return locationData[formData.city as keyof typeof locationData]?.delivery || [];
     }, [formData.city]);
 
-    const showToast = (message: string) => {
-        toastId.current += 1;
-        setToast({ message, id: toastId.current });
-        setTimeout(() => {
-            setToast((current) => (current?.id === toastId.current ? null : current));
-        }, 3000);
-    };
-
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
@@ -61,7 +52,7 @@ export default function CheckoutSection() {
     const handleConfirmOrder = () => {
         const { fullName, phone, city, district, delivery, paymentMethod } = formData;
         if (!fullName || !phone || !city || !district || !delivery || !paymentMethod) {
-            showToast("Please fill out all fields");
+            toast.error("Please fill out all fields");   // ✅ error toast
             return;
         }
 
@@ -71,8 +62,8 @@ export default function CheckoutSection() {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            showToast("Order confirmed successfully!");
-            // Redirect or further process payment
+            toast.success("Order confirmed successfully!"); // ✅ success toast
+            // Redirect or payment flow here
         }, 1000);
     };
 
@@ -84,12 +75,6 @@ export default function CheckoutSection() {
                 Checkout
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-12" />
-
-            {toast && (
-                <div className="fixed top-4 right-4 z-50 bg-gray-700 text-white px-4 py-2 rounded-md shadow-md transition-opacity duration-300 opacity-100 font-serif text-sm">
-                    {toast.message}
-                </div>
-            )}
 
             {cartItems.length > 0 ? (
                 <div className="flex flex-col lg:flex-row gap-8">

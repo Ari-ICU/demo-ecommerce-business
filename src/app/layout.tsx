@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 import { CartProvider } from "@/context/cart/CartContext";
 import AHeader from "../components/AHeader";
 import AFooter from "../components/AFooter";
@@ -33,6 +34,7 @@ export default function RootLayout({
         <CartProvider>
           <AHeader />
           {children}
+          <Toaster position="top-right" reverseOrder={false} />
           <AFooter />
         </CartProvider>
       </body>

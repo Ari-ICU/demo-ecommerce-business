@@ -4,36 +4,54 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2, ArrowRight, Plus, Minus } from "lucide-react";
-import { useState, useRef } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { useState } from "react";
 import { useCart } from "@/context/cart/CartContext";
 
 export default function CartSection() {
     const router = useRouter();
     const { cartItems, updateQuantity, removeFromCart } = useCart();
     const [loading, setLoading] = useState(false);
-    const [toast, setToast] = useState<{ message: string; id: number } | null>(null);
-    const toastId = useRef(0);
-
-    const showToast = (message: string) => {
-        toastId.current += 1;
-        setToast({ message, id: toastId.current });
-        setTimeout(() => {
-            setToast((current) => (current?.id === toastId.current ? null : current));
-        }, 3000);
-    };
 
     const handleRemoveItem = (id: number, name: string) => {
         removeFromCart(id);
-        showToast(`${name} removed from cart`);
+        toast.success(`${name} removed from cart`, {
+            style: {
+                background: '#1f2937',
+                color: '#ffffff',
+                fontFamily: 'serif',
+                fontSize: '14px',
+                borderRadius: '8px',
+                padding: '12px',
+            },
+        });
     };
 
     const handleQuantityChange = (id: number, newQuantity: number, name: string) => {
         if (newQuantity <= 0) {
             removeFromCart(id);
-            showToast(`${name} removed from cart`);
+            toast.success(`${name} removed from cart`, {
+                style: {
+                    background: '#1f2937',
+                    color: '#ffffff',
+                    fontFamily: 'serif',
+                    fontSize: '14px',
+                    borderRadius: '8px',
+                    padding: '12px',
+                },
+            });
         } else {
             updateQuantity(id, newQuantity);
-            showToast(`Quantity updated for ${name}`);
+            toast.success(`Quantity updated for ${name}`, {
+                style: {
+                    background: '#1f2937',
+                    color: '#ffffff',
+                    fontFamily: 'serif',
+                    fontSize: '14px',
+                    borderRadius: '8px',
+                    padding: '12px',
+                },
+            });
         }
     };
 
@@ -41,7 +59,16 @@ export default function CartSection() {
         setLoading(true);
         setTimeout(() => {
             setLoading(false);
-            showToast("Proceeding to checkout");
+            toast.success("Proceeding to checkout", {
+                style: {
+                    background: '#1f2937',
+                    color: '#ffffff',
+                    fontFamily: 'serif',
+                    fontSize: '14px',
+                    borderRadius: '8px',
+                    padding: '12px',
+                },
+            });
             router.push("/checkout");
         }, 1000);
     };
@@ -50,17 +77,11 @@ export default function CartSection() {
 
     return (
         <section className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 max-w-7xl mx-auto relative">
+            <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-medium text-gray-400 mb-8 sm:mb-10 text-center">
                 Your Cart
             </h2>
             <div className="w-16 h-0.5 bg-gray-300 mx-auto mb-8 sm:mb-12" />
-
-            {/* Toast */}
-            {toast && (
-                <div className="fixed top-4 right-4 z-50 bg-gray-700 text-white px-4 py-2 rounded-md shadow-md font-serif text-sm">
-                    {toast.message}
-                </div>
-            )}
 
             {cartItems.length > 0 ? (
                 <div className="flex flex-col gap-6 sm:gap-8">

@@ -25,7 +25,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
     return (
         <div className="group flex flex-col rounded-md border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300 w-full bg-white">
             {/* Image Section */}
-            <Link href={`/collections/${product.id}`} className="relative w-full aspect-[4/3] block overflow-hidden">
+            <Link  href={`/collections/${encodeURIComponent(product.name)}`} className="relative w-full aspect-[4/3] block overflow-hidden">
                 <Image
                     src={product.image}
                     alt={product.name}

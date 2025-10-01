@@ -69,7 +69,7 @@ export default function OrderHistorySection() {
 
                         {/* View Details */}
                         <Link
-                            href={`/${language}/orders/${order.id}`} // ✅ include language in URL
+                            href={`/orders//${language}/${order.id}`} // ✅ include language in URL
                             className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-700 text-white text-xs sm:text-sm font-medium hover:bg-gray-800 transition-colors self-start sm:self-center"
                         >
                             {language === "en" ? "View Details" : "មើលព័ត៌មានលម្អិត"} <ArrowRight className="w-4 h-4" />
@@ -84,7 +84,7 @@ export default function OrderHistorySection() {
                             : "អ្នកមិនមានប្រវត្តិកម្មវិធីបញ្ជាទិញនៅឡើយទេ។"}
                     </p>
                     <Link
-                        href={`/${language}/sale`} // ✅ include language in URL
+                        href={`/sale/${language}`} // ✅ include language in URL
                         className="mt-4 inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium hover:bg-gray-800"
                     >
                         {language === "en" ? "Start Shopping" : "ចាប់ផ្តើមទិញ"}

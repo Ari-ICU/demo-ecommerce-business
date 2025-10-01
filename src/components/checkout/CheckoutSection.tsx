@@ -265,7 +265,7 @@ export default function CheckoutSection() {
                         {lang === "kh" ? "កន្ត្រករបស់អ្នកទទេ" : "Your cart is empty."}
                     </p>
                     <Link
-                        href="/collections"
+                        href={`/sale/${lang}`}
                         className="inline-flex items-center justify-center gap-2 rounded-md bg-gray-700 text-white px-6 py-3 text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
                     >
                         {lang === "kh" ? "ទិញឥឡូវ" : "Shop Now"} <ArrowRight className="w-4 h-4" />
